@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Energy Meter - Monitor Your Power</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #f4f5f4;
+            --panel: #ffffff;
+            --border: #dde2e0;
+            --border-strong: #c3cbc8;
+            --text: #13231f;
+            --text-muted: #5c6b67;
+            --text-faint: #8b9793;
+            --accent: #015b53;
+            --accent-soft: #e7efee;
+            --radius: 6px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: var(--bg);
+            min-height: 100vh;
+            color: var(--text);
+        }
+
+        .mono {
+            font-family: 'IBM Plex Mono', 'SFMono-Regular', Consolas, monospace;
+            font-variant-numeric: tabular-nums;
+        }
+
+        /* Navigation */
+        nav {
+            position: sticky;
+            top: 0;
+            width: 100%;
+            background: var(--panel);
+            border-bottom: 1px solid var(--border);
+            padding: 14px 32px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 100;
+        }
+
+        .logo {
+            font-size: 15px;
+            font-weight: 700;
+            color: var(--text);
+            display: flex;
+            align-items: center;
+            gap: 9px;
+            text-decoration: none;
+            letter-spacing: 0.2px;
+        }
+
+        .logo-mark {
+            width: 8px;
+            height: 8px;
+            background: var(--accent);
+            border-radius: 1px;
+        }
+
+        nav ul {
+            display: flex;
+            list-style: none;
+            gap: 4px;
+            align-items: center;
+        }
+
+        nav a {
+            text-decoration: none;
+            color: var(--text-muted);
+            font-weight: 600;
+            font-size: 13px;
+            letter-spacing: 0.2px;
+            padding: 7px 14px;
+            border-radius: 4px;
+            transition: color 0.15s ease, background 0.15s ease;
+        }
+
+        nav a:hover {
+            color: var(--text);
+            background: var(--bg);
+        }
+
+        nav a.active {
+            color: var(--accent);
+            background: var(--accent-soft);
+        }
+
+        .cta-button {
+            background: var(--accent) !important;
+            color: #ffffff !important;
+        }
+
+        .cta-button:hover {
+            background: #014a44 !important;
+        }
+
+        /* Main Content */
+        main {
+            position: relative;
+            z-index: 1;
+            min-height: calc(100vh - 60px);
+        }
+
+        /* Hero Section */
+        .hero {
+            padding: 96px 40px 88px;
+            text-align: center;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .hero-eyebrow {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            padding: 6px 14px;
+            background: var(--panel);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            font-size: 11.5px;
+            font-weight: 600;
+            color: var(--text-muted);
+            letter-spacing: 0.3px;
+            margin-bottom: 28px;
+        }
+
+        .hero-eyebrow .dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: var(--accent);
+        }
+
+        .hero h1 {
+            font-size: 48px;
+            font-weight: 800;
+            margin-bottom: 18px;
+            color: var(--text);
+            letter-spacing: -1.2px;
+            line-height: 1.1;
+        }
+
+        .hero p {
+            font-size: 17px;
+            color: var(--text-muted);
+            margin-bottom: 36px;
+            max-width: 560px;
+            margin-left: auto;
+            margin-right: auto;
+            line-height: 1.6;
+        }
+
+        .hero-buttons {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 12px 26px;
+            font-size: 14px;
+            font-weight: 600;
+            letter-spacing: 0.2px;
+            border: 1px solid transparent;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background 0.15s ease, border-color 0.15s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-primary {
+            background: var(--accent);
+            color: #ffffff;
+        }
+
+        .btn-primary:hover {
+            background: #014a44;
+        }
+
+        .btn-secondary {
+            background: var(--panel);
+            color: var(--text);
+            border: 1px solid var(--border);
+        }
+
+        .btn-secondary:hover {
+            border-color: var(--border-strong);
+            background: var(--bg);
+        }
+
+        /* Stats Section */
+        .stats {
+            padding: 56px 40px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .stats-container {
+            max-width: 900px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 1px;
+            background: var(--border);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            overflow: hidden;
+        }
+
+        .stat-item {
+            background: var(--panel);
+            padding: 32px 24px;
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 34px;
+            font-weight: 700;
+            color: var(--text);
+            margin-bottom: 8px;
+            letter-spacing: -0.5px;
+        }
+
+        .stat-label {
+            font-size: 12.5px;
+            color: var(--text-faint);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* Feature Section */
+        .features {
+            padding: 72px 40px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .features-container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .section-eyebrow {
+            font-size: 11.5px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.9px;
+            color: var(--text-faint);
+            text-align: center;
+            margin-bottom: 10px;
+        }
+
+        .section-title {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--text);
+            text-align: center;
+            margin-bottom: 44px;
+            letter-spacing: -0.5px;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 16px;
+        }
+
+        .feature-card {
+            background: var(--panel);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 26px 24px;
+        }
+
+        .feature-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 6px;
+            background: var(--accent-soft);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 16px;
+            color: var(--accent);
+            font-weight: 700;
+            font-size: 14px;
+        }
+
+        .feature-card h3 {
+            font-size: 15px;
+            font-weight: 700;
+            color: var(--text);
+            margin-bottom: 8px;
+            letter-spacing: -0.1px;
+        }
+
+        .feature-card p {
+            font-size: 13.5px;
+            color: var(--text-muted);
+            line-height: 1.55;
+        }
+
+        /* CTA Section */
+        .cta-section {
+            padding: 72px 40px;
+            text-align: center;
+        }
+
+        .cta-section h2 {
+            font-size: 30px;
+            font-weight: 700;
+            margin-bottom: 14px;
+            color: var(--text);
+            letter-spacing: -0.6px;
+        }
+
+        .cta-section p {
+            font-size: 15px;
+            color: var(--text-muted);
+            margin-bottom: 30px;
+            max-width: 480px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        /* Footer */
+        footer {
+            padding: 28px 40px;
+            text-align: center;
+            border-top: 1px solid var(--border);
+        }
+
+        footer p {
+            font-size: 12px;
+            color: var(--text-faint);
+            margin-bottom: 4px;
+        }
+
+        @media (max-width: 768px) {
+            .hero {
+                padding: 64px 20px 56px;
+            }
+
+            .hero h1 {
+                font-size: 34px;
+            }
+
+            .hero p {
+                font-size: 15px;
+            }
+
+            .section-title {
+                font-size: 24px;
+            }
+
+            .cta-section h2 {
+                font-size: 26px;
+            }
+
+            .stats {
+                padding: 40px 20px;
+            }
+
+            .features {
+                padding: 56px 20px;
+            }
+
+            .cta-section {
+                padding: 56px 20px;
+            }
+
+            nav {
+                padding: 12px 20px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .hero h1 {
+                font-size: 28px;
+            }
+
+            .cta-section h2 {
+                font-size: 22px;
+            }
+
+            .hero-buttons {
+                flex-direction: column;
+            }
+
+            .btn {
+                width: 100%;
+            }
+
+            .stat-number {
+                font-size: 28px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav>
+        <a href="home.html" class="logo">
+            <span class="logo-mark"></span>
+            Energy Meter
+        </a>
+        <ul>
+            <li><a href="home.html" class="active">Home</a></li>
+            <li><a href="dashboard.html">Dashboard</a></li>
+            <li><a href="dashboard.html" class="cta-button">Get Started</a></li>
+        </ul>
+    </nav>
+
+    <!-- Main Content -->
+    <main>
+        <!-- Hero Section -->
+        <section class="hero">
+            <div class="hero-eyebrow">
+                <span class="dot"></span>
+                Live monitoring, updated every 2 seconds
+            </div>
+            <h1>Smart Energy Monitoring</h1>
+            <p>Track voltage, current, power draw, and consumption in real time, with historical trends and clear alerts when usage runs high.</p>
+            <div class="hero-buttons">
+                <a href="dashboard.html" class="btn btn-primary">View Dashboard</a>
+                <a href="#features" class="btn btn-secondary">Learn More</a>
+            </div>
+        </section>
+
+        <!-- Stats Section -->
+        <section class="stats">
+            <div class="stats-container">
+                <div class="stat-item">
+                    <div class="stat-number mono">24/7</div>
+                    <div class="stat-label">Continuous Monitoring</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number mono">60min</div>
+                    <div class="stat-label">Historical Data</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number mono">2s</div>
+                    <div class="stat-label">Update Interval</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Features Section -->
+        <section class="features" id="features">
+            <div class="features-container">
+                <div class="section-eyebrow">What you get</div>
+                <div class="section-title">Everything you need to track power</div>
+                <div class="features-grid">
+                    <div class="feature-card">
+                        <div class="feature-icon">V</div>
+                        <h3>Voltage &amp; Current</h3>
+                        <p>Live readings updated on a two-second interval, so you always see the present state of the circuit.</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">W</div>
+                        <h3>Power Draw</h3>
+                        <p>Instant wattage with clear status flags when draw crosses into high or critical thresholds.</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">kWh</div>
+                        <h3>Energy Totals</h3>
+                        <p>Running kilowatt-hour totals so you can track consumption over the session or the day.</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">PF</div>
+                        <h3>Power Factor</h3>
+                        <p>Monitor efficiency of the load and spot when reactive power is dragging performance down.</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">↗</div>
+                        <h3>Trend Chart</h3>
+                        <p>A rolling 60-minute chart with peak, average, and minimum power, so patterns are easy to spot.</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">●</div>
+                        <h3>Connection Status</h3>
+                        <p>A persistent status indicator shows exactly when the dashboard is connected to the meter feed.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- CTA Section -->
+        <section class="cta-section">
+            <h2>Ready to monitor your energy?</h2>
+            <p>Open the dashboard to see live readings from your meter, no setup required.</p>
+            <a href="dashboard.html" class="btn btn-primary">Access Dashboard</a>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer>
+        <p>&copy; 2024 Energy Meter. All rights reserved.</p>
+        <p>Monitoring your power, optimizing your energy</p>
+    </footer>
+</body>
+</html>
